@@ -56,7 +56,7 @@ class Bot{
                 $ret = ["ok"=>false,"result"=>["error"=>"curl_error", "error_code"=>curl_errno($ch)]];
             }
             $ret = json_decode($res, true);
-            if (!$ret['ok']){
+            if (!empty($ret) && !$ret['ok']){
                 $log = json_encode($ret, JSON_PRETTY_PRINT);
                 $datas = json_encode($datas, JSON_PRETTY_PRINT);
                 $logger = $this->logsch ?? $this->ADMIN ?? null;
