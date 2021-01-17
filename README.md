@@ -6,7 +6,7 @@
 Ishlash usuli ikki xil:<ol>
 <li>Webhook</li>
 <li>Polling</li>
-</ol><br>
+</ol>
 Pollingda Updatelar qo'lda olinadi. <code>polling.php</code> faylini qarang.<br>
 Webhookda esa Updatelar telegram tomonidan sizning serverga yuboriladi. Bunda sizga server, Domen, SSL sertifikat kerak bo'ladi.<br>
 Webhookni <code>webhook.php</code> fayliga qilasiz.<br><br>
