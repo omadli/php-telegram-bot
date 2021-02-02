@@ -1,6 +1,9 @@
 <?php
 
-// Bu yerda polling yoziladi, skriptni konsoldan (cmd) php polling.php deb ishga tushirish kerak
+/*
+ Bu yerda polling yoziladi, skriptni konsoldan (cmd) php polling.php deb ishga tushirish kerak
+ Agar biror hostga qo'yilsa cron qilib ishlatasiz.
+*/
 if (file_exists("bot.php")){
     require_once "bot.php";
 } else {
