@@ -9,12 +9,12 @@ class Bot{
     /**
      * Bot obyekti konstruktori
      * @param String $token Bot tokeni | Kiritish majburiy
-     * @param Int $ADMIN Botning bosh admini ID raqami | Optional
-     * @param String $logsch Loglar kanali ID si yoki @username | Optional
+     * @param Int|String $ADMIN Botning bosh admini ID raqami | Optional
+     * @param Int|String $logsch Loglar kanali ID si yoki @username | Optional
      * @param Array $admins Botni boshqarishi mumkin bo'lgan adminlar ro'yxati
      * @return Bool Barcha qiymatlar to'g'ri kiritilsa true, aks holda false
      */
-    public function __construct(string $token, int $ADMIN=0, string $logsch='', array $admins=[]){
+    public function __construct(string $token, Int $ADMIN=0, string $logsch='', array $admins=[]){
         if (isset($token)) {
             $this->token = $token;
             $this->ADMIN = $ADMIN;
@@ -146,6 +146,69 @@ class Bot{
     **/
     public function sendChatAction(int $chat_id, string $action = "typing"){
         return $this->request("sendChatAction", ['chat_id'=>$chat_id, 'action'=>$action]);
+    }
+
+    /**
+    * @param array $data InlineKeyboard malumotlari qatorlar va ustunlar. Masalan 
+    * [
+    *   [ ['text'=>"text1", 'url'=>"https://example.com"], ['text'=>"text2", 'callback_data'=>"callback"] ],
+    *   [ ['text'=>"text3", 'switch_inline_query'=>"some quey"], ['text'=>"text4", 'switch_inline_query_current_chat'=>"query"] ]
+    * ]
+    * @return JSON serialized InlineKeyboard
+    */
+    public function InlineKeyboard(array $data){
+        $keyboard = ['inline_keyboard'=>$data];
+        return json_encode($keyboard);
+    }
+
+    /**
+     * @param array $keyboard Array of KeyboardButtons | kiritish majburiy
+     * @param bool $resize_keyboard | Optional | Default=false
+     * @param bool $one_time_keyboard | Optional | Default=false
+     * @param bool $selective | Optional | Default=true
+     * @return JSON serialized ReplyKeyboardMarkup
+     */
+    public function ReplyKeyboard(array $keyboard, bool $resize_keyboard=false, bool $one_time_keyboard=false, bool $selective=true){
+        $ReplyKeyboardMarkup = ['keyboard'=>$keyboard, 'resize_keyboard'=>$resize_keyboard, 'one_time_keyboard'=>$one_time_keyboard, 'selective'=>$selective];
+        return json_encode($ReplyKeyboardMarkup);
+    }
+
+    /**
+     * @param bool $force_reply ForceReply | Optional | Default=true
+     * @param bool $selective Selective | Optional | Default=true
+     * @return JSON serialized reply_markup
+     */
+    public function ForceReply($force_reply=true, $selective=true){
+        $markup = ['force_reply'=>$force_reply, 'selective'=>$selective];
+        return json_encode($markup);
+    }
+
+    /**
+     * @param int $user_id User_ID si
+     * @param string $chat_id chat ID si
+     * @return array getChatMember request result
+     */
+    public function getChatMember(int $user_id, string $chat_id){
+        $get = $this->request('getChatMember', ['chat_id'=>$chat_id, 'user_id'=>$user_id]);
+        return $get;
+    }
+
+    /**
+     * @param int $user_id User ID raqami
+     * @param string $chat_id Chat ID raqami yoki @username
+     * @return bool Agar azo bo'lsa true, aks holda false
+     */
+    public function getJoin(int $user_id, string $chat_id){
+        $ranks = ["left", "kicked"];
+        $get = $this->getChatMember($user_id, $chat_id);
+        if($get['ok']){
+            $result = $get['result'];
+            $status = $result['status'];
+            if (!in_array($status, $ranks)){
+                return true;
+            }
+        }
+        return false;
     }
     protected $actions = [
         'getUpdates',
