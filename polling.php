@@ -26,7 +26,7 @@ while (true) {
                     // print_r($update);
                     include __DIR__ . '/main.php';
                     } catch(Exception $e){
-                        $e = json_encode($e, JSON_PRETTY_PRINT);
+                        $e = json_encode($e->message(), JSON_PRETTY_PRINT);
                         $bot->sm($bot->logsch, "<pre>{$e}</pre>", "html");
                     }
                     global $offset;
