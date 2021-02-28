@@ -10,7 +10,7 @@ Ishlash usuli ikki xil:<ol>
 Pollingda Updatelar qo'lda olinadi. <code>polling.php</code> faylini qarang.<br>
 Webhookda esa Updatelar telegram tomonidan sizning serverga yuboriladi. Bunda sizga server, Domen, SSL sertifikat kerak bo'ladi.<br>
 Webhookni <code>webhook.php</code> fayliga qilasiz.<br><br><code>ws</code> parametrida bot tokenini qo'ysangiz maqsadga muvofiq.Namuna:<br>
-<code>"https://api.telegram.org/bot<TOKEN>/setWebhook?url=".urldecode("https://yoursite.com/path/to/webhook.php?ws=<TOKEN>")</code><br><br>
+<code>"https://api.telegram.org/botTOKEN/setWebhook?url=".urldecode("https://yoursite.com/path/to/webhook.php?ws=TOKEN")</code><br><br>
 <b>Asosiy qism <code>main.php</code> faylida yozilinadi.</b> Bunda Update lar pollingdan keladimi yoki webhookdan buni farqi yoq.
 
 
