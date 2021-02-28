@@ -9,17 +9,17 @@ class Bot{
     /**
      * Bot obyekti konstruktori
      * @param String $token Bot tokeni | Kiritish majburiy
-     * @param Int|String $ADMIN Botning bosh admini ID raqami | Optional
+     * @param Int|String $ADMIN Botning bosh admini ID raqami | Kiritish majburiy
      * @param Int|String $logsch Loglar kanali ID si yoki @username | Optional
      * @param Array $admins Botni boshqarishi mumkin bo'lgan adminlar ro'yxati
      * @return Bool Barcha qiymatlar to'g'ri kiritilsa true, aks holda false
      */
-    public function __construct(string $token, Int $ADMIN=0, string $logsch='', array $admins=[]){
+    public function __construct(string $token, Int $ADMIN, string $logsch='', array $admins=[]){
         if (isset($token)) {
             $this->token = $token;
             $this->ADMIN = $ADMIN;
             $this->logsch = $logsch;
-            $this->admins = $admins;
+            $this->admins = (empty($admins)) ? [$ADMIN] : $admins;
             return true;
         } else{
             return false;
@@ -34,6 +34,14 @@ class Bot{
         return $this->token;
     }
 
+    /**
+     * 
+     */
+    public function getUsername(){
+        $getme = file_get_contents('https://api.telegram.org/bot'.$this->getToken().'/getMe');
+        $username = json_decode($getme, true)['result']['username'];
+        return $username;
+    }
     /**
      * @method request() Telegram serveriga so'rovlar yuborish metodi
      * @param string $metod Metod nomi, qo'llash mumkin metodlar $actions massivi ichida joylashgan
@@ -99,7 +107,22 @@ class Bot{
             return  $this->sendMessage($data);
         }
     }
-
+    
+    /**
+    * Function sendWidthKeyboard - Reply markuplik xabarlarni yuborish uchun sodda funksiya
+    * @param int|string $chat_id - Xabar yuboriladigan chat ID si, yoki kanallar uchun @username si
+    * @param string $text - Xabar matni
+    * @param string $mode - Parse_mode formatlash tili. "markdown" yoki "HTML". Optional | Default qiymati "HTML"
+    * @param string $reply_markup - JSON formatdagi Reply_markup. Optional 
+    */
+public function sendWithKeyboard(string $chat_id, string $text, string $reply_markup, string $mode="HTML" ){
+      return $this->sendMessage([
+        'chat_id'=>$chat_id,
+        'text'=>$text,
+        'parse_mode'=>$mode,
+        'reply_markup'=>$reply_markup
+        ]);
+    }
 
     /* 
     * Updatelarni olish
@@ -154,7 +177,7 @@ class Bot{
     *   [ ['text'=>"text1", 'url'=>"https://example.com"], ['text'=>"text2", 'callback_data'=>"callback"] ],
     *   [ ['text'=>"text3", 'switch_inline_query'=>"some quey"], ['text'=>"text4", 'switch_inline_query_current_chat'=>"query"] ]
     * ]
-    * @return JSON serialized InlineKeyboard
+    * @return string JSON serialized InlineKeyboard
     */
     public function InlineKeyboard(array $data){
         $keyboard = ['inline_keyboard'=>$data];
@@ -168,7 +191,7 @@ class Bot{
      * @param bool $selective | Optional | Default=true
      * @return JSON serialized ReplyKeyboardMarkup
      */
-    public function ReplyKeyboard(array $keyboard, bool $resize_keyboard=false, bool $one_time_keyboard=false, bool $selective=true){
+    public function ReplyKeyboard(array $keyboard, bool $resize_keyboard=true, bool $one_time_keyboard=false, bool $selective=true){
         $ReplyKeyboardMarkup = ['keyboard'=>$keyboard, 'resize_keyboard'=>$resize_keyboard, 'one_time_keyboard'=>$one_time_keyboard, 'selective'=>$selective];
         return json_encode($ReplyKeyboardMarkup);
     }
@@ -209,6 +232,42 @@ class Bot{
             }
         }
         return false;
+    }
+    
+    /**
+     * @method editMessageText Xabarlarni edit qilish uchun
+     * @param int|string $chat_id Chat ID si
+     * @param int $msg_id Xabar ID si
+     * @param string $text Yangi matn
+     * @param string|JSON $reply_markup JSON formatdagi reply_markup
+     * @param string $parse_mode Formatlash turi "markdown" yoki "html". Optional, default qiymati "html"
+     * @return array
+     */
+     public function editMessageText(string $chat_id, int $msg_id, string $text, string $reply_markup=null, string $parse_mode="html"){
+       return $this->request('editMessageText',[
+           'chat_id'=>$chat_id,
+           'message_id'=>$msg_id,
+           'text'=>$text,
+           'parse_mode'=>$parse_mode,
+           'reply_markup'=>$reply_markup
+         ]);
+     }
+     
+     /**
+      * @param string $chat_id chat ID si yoki kanal bo'lsa @username si 
+      * @param int $msg_id O'chiriladigan xabar ID si
+      */
+      public function deleteMessage(string $chat_id, int $msg_id){
+        return $this->request('deleteMessage',['chat_id'=>$chat_id, 'message_id'=>$msg_id]);
+      }
+      
+    /**
+     * @param int|string $id Callback_query_id
+     * @param string $text Optional text. Default qiymati empty
+     * @param bool $show_alert Xabarni alert shaklida ko'rsatish Optional, Default=false
+     */
+    public function answerCallbackQuery($id, $text="", $show_alert=false){
+      return $this->request('answerCallbackQuery',['callback_query_id'=>$id, 'text'=>$text, 'show_alert'=>$show_alert]);
     }
     protected $actions = [
         'getUpdates',
