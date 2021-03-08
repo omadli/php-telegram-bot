@@ -14,7 +14,7 @@ class Bot{
      * @param Array $admins Botni boshqarishi mumkin bo'lgan adminlar ro'yxati
      * @return Bool Barcha qiymatlar to'g'ri kiritilsa true, aks holda false
      */
-    public function __construct(string $token, Int $ADMIN, string $logsch='', array $admins=[]){
+    public function __construct(string $token, int $ADMIN, string $logsch=null, array $admins=null){
         if (isset($token)) {
             $this->token = $token;
             $this->ADMIN = $ADMIN;
@@ -61,7 +61,7 @@ class Bot{
             curl_setopt($ch, CURLOPT_POSTFIELDS, $datas);
             $res = curl_exec($ch);
             if(curl_error($ch)){
-                $ret = ["ok"=>false,"result"=>["error"=>"curl_error", "error_code"=>curl_errno($ch)]];
+                return ["ok"=>false,"result"=>["error"=>"curl_error", "error_code"=>curl_errno($ch)]];
             }
             $ret = json_decode($res, true);
             if (!empty($ret) && !$ret['ok']){
@@ -157,6 +157,7 @@ public function sendWithKeyboard(string $chat_id, string $text, string $reply_ma
         }
         return $this->request("getUpdates", $datas);
     }
+
     /**
     * SendChatAction bu bot tomonidan Action yuborishdir
     * Masalan kattaroq jarayon qilayotganda "typing",
@@ -165,7 +166,7 @@ public function sendWithKeyboard(string $chat_id, string $text, string $reply_ma
     * yuborish maqsadga muvofiq.
     * @param int $chat_id yuboriladigan chat ID si | kiritish majburiy
     * @param string $action Action turi | optional | default qiymati = "typing"
-    * @return Array
+    * @return array JSON formatdagi telegram qaytargan result massivi
     **/
     public function sendChatAction(int $chat_id, string $action = "typing"){
         return $this->request("sendChatAction", ['chat_id'=>$chat_id, 'action'=>$action]);
@@ -189,7 +190,7 @@ public function sendWithKeyboard(string $chat_id, string $text, string $reply_ma
      * @param bool $resize_keyboard | Optional | Default=false
      * @param bool $one_time_keyboard | Optional | Default=false
      * @param bool $selective | Optional | Default=true
-     * @return JSON serialized ReplyKeyboardMarkup
+     * @return string|JSON serialized ReplyKeyboardMarkup
      */
     public function ReplyKeyboard(array $keyboard, bool $resize_keyboard=true, bool $one_time_keyboard=false, bool $selective=true){
         $ReplyKeyboardMarkup = ['keyboard'=>$keyboard, 'resize_keyboard'=>$resize_keyboard, 'one_time_keyboard'=>$one_time_keyboard, 'selective'=>$selective];
@@ -199,7 +200,7 @@ public function sendWithKeyboard(string $chat_id, string $text, string $reply_ma
     /**
      * @param bool $force_reply ForceReply | Optional | Default=true
      * @param bool $selective Selective | Optional | Default=true
-     * @return JSON serialized reply_markup
+     * @return string|JSON serialized reply_markup
      */
     public function ForceReply($force_reply=true, $selective=true){
         $markup = ['force_reply'=>$force_reply, 'selective'=>$selective];
@@ -241,7 +242,7 @@ public function sendWithKeyboard(string $chat_id, string $text, string $reply_ma
      * @param string $text Yangi matn
      * @param string|JSON $reply_markup JSON formatdagi reply_markup
      * @param string $parse_mode Formatlash turi "markdown" yoki "html". Optional, default qiymati "html"
-     * @return array
+     * @return array JSON formatdagi telegram qaytargan result massivi
      */
      public function editMessageText(string $chat_id, int $msg_id, string $text, string $reply_markup=null, string $parse_mode="html"){
        return $this->request('editMessageText',[
@@ -268,6 +269,31 @@ public function sendWithKeyboard(string $chat_id, string $text, string $reply_ma
      */
     public function answerCallbackQuery($id, $text="", $show_alert=false){
       return $this->request('answerCallbackQuery',['callback_query_id'=>$id, 'text'=>$text, 'show_alert'=>$show_alert]);
+    }
+
+    /**
+     * @param int|string $chat_id Yuboriladigan Chat ID raqami
+     * @param string $photo Rasm manzili yoki file_id si
+     * @param string $caption Rasm pastidagi yozuv. Optional Default=null
+     * @param string $parse_mode Caption formatlash turi "HTML" yoki "markdown". Optional Default="HTML"
+     * @param string|JSON $reply_markup Reply markup
+     * @param int $reply_to_message_id Reply qilinadigan xabar ID raqami
+     * @return array JSON formatdagi result massivi
+     */
+    public function sendPhoto($chat_id, $photo, $caption=null, $parse_mode='HTMl', $reply_markup=null, $reply_to_message_id=null){
+        return $this->request("sendPhoto",['chat_id'=>$chat_id, 'photo'=>$photo, 'caption'=>$caption, 'parse_mode'=>$parse_mode, 'reply_markup'=>$reply_markup, 'reply_to_message_id'=>$reply_to_message_id]);
+    }
+
+    /**
+     * @param int|string $chat_id Yuboriladigan chat ID si yoki kanal @username si
+     * @param float $latitude Kenglik
+     * @param float $longitude Uzunlik
+     * @param int $reply_to_message_id Reply tarzida yuboriladigan xabar ID si. Optional
+     * @param string $reply_markup JSON shaklidagi reply_markup
+     * @return array request natijasi
+     */
+    public function sendLocation($chat_id, $latitude, $longitude, $reply_to_message_id=0, $reply_markup=null){
+        return $this->request('sendLocation', ['chat_id'=>$chat_id, 'latitude'=>$latitude, 'longitude'=>$longitude, 'reply_to_message_id'=>$reply_to_message_id, 'reply_markup'=>$reply_markup]);
     }
     protected $actions = [
         'getUpdates',
